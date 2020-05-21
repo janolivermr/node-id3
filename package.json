@@ -11,6 +11,9 @@
   "bugs": {
     "url": "https://github.com/Zazama/node-id3/issues"
   },
+  "files": [
+    "lib/**/*"
+  ],
   "keywords": [
     "id3",
     "mp3",
@@ -28,10 +31,20 @@
     "example": "example"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "lint": "tslint -p tsconfig.json"
   },
   "license": "MIT",
   "dependencies": {
     "iconv-lite": "^0.4.15"
+  },
+  "devDependencies": {
+    "@types/node": "^14.0.4",
+    "prettier": "^2.0.5",
+    "tslint": "^6.1.2",
+    "tslint-config-prettier": "^1.18.0",
+    "typescript": "^3.9.3"
   }
 }
