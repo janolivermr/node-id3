@@ -222,3 +222,7 @@ popularimeter         "POPM"
 private               "PRIV"
 chapter               "CHAP"
 ```
+
+Test MP3 file from Wikimedia Commons, public domain file containing a 440Hz tone
+https://commons.wikimedia.org/wiki/File:440_Sine_wave.ogg
+
