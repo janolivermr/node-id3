@@ -19,7 +19,6 @@ it('decodes text frames correctly', () => {
     expect(tags.partOfSet).toBe('3/4');
     expect(tags.genre).toBe('13');
     expect(tags.encodingTechnology).toBe('Lavf57.56.101');
-    expect(3).toEqual(5);
 });
 
 test.todo('image decoding')

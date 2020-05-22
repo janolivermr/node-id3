@@ -151,23 +151,23 @@ export interface Tags {
     /**
      * The 'Media type' frame describes from which media the sound originated. This may be a text string or a reference to the predefined media types found in the list below. References are made within "(" and ")" and are optionally followed by a text refinement, e.g. "(MC) with four channels". If a text refinement should begin with a "(" character it should be replaced with "((". Predefined refinements is appended after the media type, e.g. "(CD/A)" or "(VID/PAL/VHS)".
      *
-     *DIG     Other digital media
+     * DIG     Other digital media
      *    /A  Analog transfer from media
      *
-     *ANA     Other analog media
+     * ANA     Other analog media
      *   /WAC Wax cylinder
      *   /8CA 8-track tape cassette
      *
-     *CD      CD
+     * CD      CD
      *     /A Analog transfer from media
      *    /DD DDD
      *    /AD ADD
      *    /AA AAD
      *
-     *LD      Laserdisc
+     * LD      Laserdisc
      *     /A Analog transfer from media
      *
-     *TT      Turntable records
+     * TT      Turntable records
      *    /33 33.33 rpm
      *    /45 45 rpm
      *    /71 71.29 rpm
@@ -175,10 +175,10 @@ export interface Tags {
      *    /78 78.26 rpm
      *    /80 80 rpm
      *
-     *MD      MiniDisc
+     * MD      MiniDisc
      *     /A Analog transfer from media
      *
-     *DAT     DAT
+     * DAT     DAT
      *     /A Analog transfer from media
      *     /1 standard, 48 kHz/16 bits, linear
      *     /2 mode 2, 32 kHz/16 bits, linear
@@ -187,18 +187,18 @@ export interface Tags {
      *     /5 mode 5, 44.1 kHz/16 bits, linear
      *     /6 mode 6, 44.1 kHz/16 bits, 'wide track' play
      *
-     *DCC     DCC
+     * DCC     DCC
      *     /A Analog transfer from media
      *
-     *DVD     DVD
+     * DVD     DVD
      *     /A Analog transfer from media
      *
-     *TV      Television
+     * TV      Television
      *   /PAL PAL
      *  /NTSC NTSC
      * /SECAM SECAM
      *
-     *VID     Video
+     * VID     Video
      *   /PAL PAL
      *  /NTSC NTSC
      * /SECAM SECAM
@@ -206,16 +206,16 @@ export interface Tags {
      *  /SVHS S-VHS
      *  /BETA BETAMAX
      *
-     *RAD     Radio
+     * RAD     Radio
      *    /FM FM
      *    /AM AM
      *    /LW LW
      *    /MW MW
      *
-     *TEL     Telephone
+     * TEL     Telephone
      *     /I ISDN
      *
-     *MC      MC (normal cassette)
+     * MC      MC (normal cassette)
      *     /4 4.75 cm/s (normal speed for a two sided cassette)
      *     /9 9.5 cm/s
      *     /I Type I cassette (ferric/normal)
@@ -223,7 +223,7 @@ export interface Tags {
      *   /III Type III cassette (ferric chrome)
      *    /IV Type IV cassette (metal)
      *
-     *REE     Reel
+     * REE     Reel
      *     /9 9.5 cm/s
      *    /19 19 cm/s
      *    /38 38 cm/s
@@ -524,10 +524,10 @@ export class NodeID3 {
 **  fn          => Function (for asynchronous usage)
 */
 public write(tags: Tags, filebuffer: string | Buffer, fn?: (err: NodeJS.ErrnoException | Error | null, buffer?: Buffer) => void) {
-    let completeTag = this.create(tags)
+    const completeTag = this.create(tags)
     if(filebuffer instanceof Buffer) {
         filebuffer = this.removeTagsFromBuffer(filebuffer) || filebuffer
-        let completeBuffer = Buffer.concat([completeTag!, filebuffer])
+        const completeBuffer = Buffer.concat([completeTag!, filebuffer])
         if(fn && typeof fn === 'function') {
             fn(null, completeBuffer)
             return
@@ -544,9 +544,9 @@ public write(tags: Tags, filebuffer: string | Buffer, fn?: (err: NodeJS.ErrnoExc
                     return
                 }
                 data = this.removeTagsFromBuffer(data) || data
-                let rewriteFile = Buffer.concat([completeTag!, data])
-                fs.writeFile(filebuffer, rewriteFile, 'binary', (err) => {
-                    fn(err)
+                const rewriteFile = Buffer.concat([completeTag!, data])
+                fs.writeFile(filebuffer, rewriteFile, 'binary', (writeErr) => {
+                    fn(writeErr)
                 })
             })
         } catch(err) {
@@ -556,7 +556,7 @@ public write(tags: Tags, filebuffer: string | Buffer, fn?: (err: NodeJS.ErrnoExc
         try {
             let data = fs.readFileSync(filebuffer)
             data = this.removeTagsFromBuffer(data) || data
-            let rewriteFile = Buffer.concat([completeTag!, data])
+            const rewriteFile = Buffer.concat([completeTag!, data])
             fs.writeFileSync(filebuffer, rewriteFile, 'binary')
             return true
         } catch(err) {
@@ -583,7 +583,7 @@ public create(tags: Tags, fn?: (buffer: Buffer) => void) {
     //  Don't count ID3 header itself
     totalSize -= 10
     //  ID3 header size uses only 7 bits of a byte, bit shift is needed
-    let size = this.encodeSize(totalSize)
+    const size = this.encodeSize(totalSize)
 
     //  Write bytes to ID3 frame header, which is the first frame
     frames[0].writeUInt8(size[0], 6)
@@ -599,22 +599,22 @@ public create(tags: Tags, fn?: (buffer: Buffer) => void) {
 }
 
 protected createBuffersFromTags(tags: { [id: string]: any}) {
-    let frames: Buffer[] = []
-    let tagNames = Object.keys(tags)
+    const frames: Buffer[] = []
+    const tagNames = Object.keys(tags)
 
     tagNames.forEach(tag => {
         //  Check if passed tag is text frame (Alias or ID)
         let frame
-        if (TFrames[tag] || Object.keys(TFrames).map(i => TFrames[i]).indexOf(tag) != -1) {
-            let specName = TFrames[tag] || tag
+        if (TFrames[tag] || Object.keys(TFrames).map(i => TFrames[i]).indexOf(tag) !== -1) {
+            const specName = TFrames[tag] || tag
             frame = this.createTextFrame(specName, tags[tag])
         } else if (SFrames[tag]) {  //  Check if Alias of special frame
-            let createFrameFunction = SFrames[tag].create
+            const createFrameFunction = SFrames[tag].create
             // frame = this[createFrameFunction](tags[tag])
             frame = this.proxyCall(createFrameFunction, tags[tag])
-        } else if (Object.keys(SFrames).map(i => SFrames[i]).map(x => x.name).indexOf(tag) != -1) {  //  Check if ID of special frame
+        } else if (Object.keys(SFrames).map(i => SFrames[i]).map(x => x.name).indexOf(tag) !== -1) {  //  Check if ID of special frame
             //  get create function from special frames where tag ID is found at SFrame[index].name
-            let createFrameFunction = SFrames[Object.keys(SFrames)[Object.keys(SFrames).map(i => SFrames[i]).map(x => x.name).indexOf(tag)]].create
+            const createFrameFunction = SFrames[Object.keys(SFrames)[Object.keys(SFrames).map(i => SFrames[i]).map(x => x.name).indexOf(tag)]].create
             // frame = this[createFrameFunction](tags[tag])
             frame = this.proxyCall(createFrameFunction, tags[tag])
         }
@@ -646,17 +646,17 @@ public read(filebuffer: string | Buffer, options?: ((err: NodeJS.ErrnoException 
         if(typeof filebuffer === "string" || filebuffer instanceof String) {
             filebuffer = fs.readFileSync(filebuffer)
         }
-        let tags = this.getTagsFromBuffer(filebuffer, options)
+        const tags = this.getTagsFromBuffer(filebuffer, options)
         return tags
     } else if (fn && typeof fn === 'function' && fn === undefined) {
         if(typeof filebuffer === "string" || filebuffer instanceof String) {
             fs.readFile(filebuffer, (err, data) => {
                 if(err) {
-                    fn!(err, null) //TODO exclamation point
+                    fn!(err, null) // TODO exclamation point
                 } else {
                     try {
-                        let tags = this.getTagsFromBuffer(data, options)
-                        fn!(null, tags) //TODO exclamation point
+                        const tags = this.getTagsFromBuffer(data, options)
+                        fn!(null, tags) // TODO exclamation point
                     } catch (e) {
                         fn!(e, null)
                     }
@@ -673,8 +673,8 @@ public read(filebuffer: string | Buffer, options?: ((err: NodeJS.ErrnoException 
 **  fn          => function (for asynchronous usage)
 */
 public update(tags: Tags, filebuffer: string | Buffer, fn?: (err: NodeJS.ErrnoException | Error | null, buffer?: Buffer) => void) {
-    let rawTags: { [id: string]: any} = {}
-    let SRawToNameMap: { [id: string]: any} = {}
+    const rawTags: { [id: string]: any} = {}
+    const SRawToNameMap: { [id: string]: any} = {}
     Object.keys(SFrames).map((key, index) => {
         SRawToNameMap[SFrames[key].name] = key
     })
@@ -697,18 +697,18 @@ public update(tags: Tags, filebuffer: string | Buffer, fn?: (err: NodeJS.ErrnoEx
         }
     })
     if(!fn || typeof fn !== 'function') {
-        let currentTagsTags = this.read(filebuffer)
-        let currentTags: { [id: string]: any} = currentTagsTags.raw || {}
+        const currentTagsTags = this.read(filebuffer)
+        const currentTags: { [id: string]: any} = currentTagsTags.raw || {}
         //  update current tags with new or keep them
-        Object.keys(rawTags).map(function(tag) {
+        Object.keys(rawTags).map((tag) => {
             if(SFrames[SRawToNameMap[tag]] && SFrames[SRawToNameMap[tag]].multiple && SFrames[SRawToNameMap[tag]].updateCompareKey && currentTags[tag] && rawTags[tag]) {
-                let cCompare: { [id: string]: any} = {}
+                const cCompare: { [id: string]: any} = {}
                 currentTags[tag].forEach((cTag: any, index: any) => {
-                    cCompare[cTag[SFrames[SRawToNameMap[tag]].updateCompareKey!]] = index //TODO Fix exclamation point
+                    cCompare[cTag[SFrames[SRawToNameMap[tag]].updateCompareKey!]] = index // TODO Fix exclamation point
                 })
                 if(!(rawTags[tag] instanceof Array)) rawTags[tag] = [rawTags[tag]]
                 rawTags[tag].forEach((rTag: any, index: any) => {
-                    let comparison = cCompare[rTag[SFrames[SRawToNameMap[tag]].updateCompareKey!]] //TODO Fix exclamation point
+                    const comparison = cCompare[rTag[SFrames[SRawToNameMap[tag]].updateCompareKey!]] // TODO Fix exclamation point
                     if(comparison !== undefined) {
                         currentTags[tag][comparison] = rTag
                     } else {
@@ -721,22 +721,22 @@ public update(tags: Tags, filebuffer: string | Buffer, fn?: (err: NodeJS.ErrnoEx
         })
         return this.write(currentTags, filebuffer)
     } else {
-        this.read(filebuffer, (err: NodeJS.ErrnoException | null, tags: Tags | null) => {
-            if(err || tags === null) {
+        this.read(filebuffer, (err: NodeJS.ErrnoException | null, tagsData: Tags | null) => {
+            if(err || tagsData === null) {
                 fn(err)
                 return
             }
-            let currentTags: { [id: string]: any} = tags.raw || {}
+            const currentTags: { [id: string]: any} = tagsData.raw || {}
             //  update current tags with new or keep them
-            Object.keys(rawTags).map(function(tag) {
+            Object.keys(rawTags).map((tag) => {
                 if(SFrames[SRawToNameMap[tag]] && SFrames[SRawToNameMap[tag]].multiple && currentTags[tag] && rawTags[tag]) {
-                    let cCompare: { [id: string]: any} = {}
+                    const cCompare: { [id: string]: any} = {}
                     currentTags[tag].forEach((cTag: any, index: any) => {
-                        cCompare[cTag[SFrames[SRawToNameMap[tag]].updateCompareKey!]] = index //TODO Fix exclamation point
+                        cCompare[cTag[SFrames[SRawToNameMap[tag]].updateCompareKey!]] = index // TODO Fix exclamation point
                     })
                     if(!(rawTags[tag] instanceof Array)) rawTags[tag] = [rawTags[tag]]
                     rawTags[tag].forEach((rTag: any, index: any) => {
-                        let comparison = cCompare[rTag[SFrames[SRawToNameMap[tag]].updateCompareKey!]] //TODO Fix exclamation point
+                        const comparison = cCompare[rTag[SFrames[SRawToNameMap[tag]].updateCompareKey!]] // TODO Fix exclamation point
                         if(comparison !== undefined) {
                             currentTags[tag][comparison] = rTag
                         } else {
@@ -758,46 +758,46 @@ public update(tags: Tags, filebuffer: string | Buffer, fn?: (err: NodeJS.ErrnoEx
 **  options     => Object
 */
 protected getTagsFromBuffer(filebuffer: Buffer, options: any): Tags {
-    let framePosition = this.getFramePosition(filebuffer)
+    const framePosition = this.getFramePosition(filebuffer)
     if(framePosition === -1) {
-        throw 'Could not find ID3 Frame'; // TODO improve error text
+        throw new Error('Could not find ID3 Frame'); // TODO improve error text
     }
-    let frameSize = this.getTagSize(Buffer.from(filebuffer.toString('hex', framePosition, framePosition + 10), "hex")) + 10
-    let ID3Frame = Buffer.alloc(frameSize + 1)
-    let ID3FrameBody = Buffer.alloc(frameSize - 10 + 1)
+    const frameSize = this.getTagSize(Buffer.from(filebuffer.toString('hex', framePosition, framePosition + 10), "hex")) + 10
+    const ID3Frame = Buffer.alloc(frameSize + 1)
+    const ID3FrameBody = Buffer.alloc(frameSize - 10 + 1)
     filebuffer.copy(ID3Frame, 0, framePosition)
     filebuffer.copy(ID3FrameBody, 0, framePosition + 10)
 
-    //ID3 version e.g. 3 if ID3v2.3.0
-    let ID3Version = ID3Frame[3]
+    // ID3 version e.g. 3 if ID3v2.3.0
+    const ID3Version = ID3Frame[3]
     let identifierSize = 4
     let textframeHeaderSize = 10
-    if(ID3Version == 2) {
+    if(ID3Version === 2) {
         identifierSize = 3
         textframeHeaderSize = 6
     }
 
-    let frames = this.getFramesFromID3Body(ID3FrameBody, ID3Version, identifierSize, textframeHeaderSize)
+    const frames = this.getFramesFromID3Body(ID3FrameBody, ID3Version, identifierSize, textframeHeaderSize)
 
     return this.getTagsFromFrames(frames, ID3Version)
 }
 
 protected getFramesFromID3Body(ID3FrameBody: Buffer, ID3Version: number, identifierSize: number, textframeHeaderSize: number): DescribedFrame[] {
     let currentPosition = 0
-    let frames: DescribedFrame[] = []
+    const frames: DescribedFrame[] = []
     while(currentPosition < ID3FrameBody.length && ID3FrameBody[currentPosition] !== 0x00) {
-        let bodyFrameHeader = Buffer.alloc(textframeHeaderSize)
+        const bodyFrameHeader = Buffer.alloc(textframeHeaderSize)
         ID3FrameBody.copy(bodyFrameHeader, 0, currentPosition)
 
         let decodeSize = false
-        if(ID3Version == 4) {
+        if(ID3Version === 4) {
             decodeSize = true
         }
-        let bodyFrameSize = this.getFrameSize(bodyFrameHeader, decodeSize, ID3Version)
+        const bodyFrameSize = this.getFrameSize(bodyFrameHeader, decodeSize, ID3Version)
         if(bodyFrameSize > (ID3FrameBody.length - currentPosition)) {
             break
         }
-        let bodyFrameBuffer = Buffer.alloc(bodyFrameSize)
+        const bodyFrameBuffer = Buffer.alloc(bodyFrameSize)
         ID3FrameBody.copy(bodyFrameBuffer, 0, currentPosition + textframeHeaderSize)
         //  Size of sub frame + its header
         currentPosition += bodyFrameSize + textframeHeaderSize
@@ -811,7 +811,7 @@ protected getFramesFromID3Body(ID3FrameBody: Buffer, ID3Version: number, identif
 }
 
 protected getTagsFromFrames(frames: DescribedFrame[], ID3Version: number) {
-    let tags: any = { raw: {} }
+    const tags: any = { raw: {} }
 
     frames.forEach((frame: DescribedFrame) => {
         //  Check first character if frame is text frame
@@ -824,19 +824,19 @@ protected getTagsFromFrames(frames: DescribedFrame[], ID3Version: number) {
                 decoded = iconv.decode(frame.body.slice(1), "ISO-8859-1").replace(/\0/g, "")
             }
             tags.raw[frame.name] = decoded
-            let versionFrames = ID3Version === 2 ? TFramesV220 : TFrames;
-            Object.keys(versionFrames).map(function(key) {
+            const versionFrames = ID3Version === 2 ? TFramesV220 : TFrames;
+            Object.keys(versionFrames).map((key) => {
                 if(versionFrames[key] === frame.name) {
                     tags[key] = decoded
                 }
             })
         } else {
-            let versionFrames = ID3Version === 2 ? SFramesV220 : SFrames;
+            const versionFrames = ID3Version === 2 ? SFramesV220 : SFrames;
             //  Check if non-text frame is supported
             Object.keys(versionFrames).map((key: string) => {
                 if(versionFrames[key].name === frame.name) {
                     // let decoded = this[versionFrames[key].read](frame.body, ID3Version)
-                    let decoded = this.proxyCall(versionFrames[key].read, frame.body, ID3Version) 
+                    const decoded = this.proxyCall(versionFrames[key].read, frame.body, ID3Version) 
                     if(versionFrames[key].multiple) {
                         if(!tags[key]) tags[key] = []
                         if(!tags.raw[frame.name]) tags.raw[frame.name] = []
@@ -859,8 +859,8 @@ protected getTagsFromFrames(frames: DescribedFrame[], ID3Version: number) {
 **  buffer  => Buffer
 */
 protected getFramePosition(buffer: Buffer) {
-    let framePosition = buffer.indexOf("ID3")
-    if(framePosition == -1 || framePosition > 20) {
+    const framePosition = buffer.indexOf("ID3")
+    if(framePosition === -1 || framePosition > 20) {
         return -1
     } else {
         return framePosition
@@ -899,20 +899,21 @@ protected getFrameSize(buffer: Buffer, decode: boolean, ID3Version: number) {
 **  data => buffer
 */
 protected removeTagsFromBuffer(data: Buffer) {
-    let framePosition = this.getFramePosition(data)
+    const framePosition = this.getFramePosition(data)
 
-    if(framePosition == -1) {
+    if(framePosition === -1) {
         return data
     }
 
-    let hSize = Buffer.from([data[framePosition + 6], data[framePosition + 7], data[framePosition + 8], data[framePosition + 9]])
+    const hSize = Buffer.from([data[framePosition + 6], data[framePosition + 7], data[framePosition + 8], data[framePosition + 9]])
 
+    // tslint:disable-next-line: no-bitwise
     if ((hSize[0] | hSize[1] | hSize[2] | hSize[3]) & 0x80) {
         //  Invalid tag size (msb not 0)
         return false
     }
 
-    let size = this.decodeSize(hSize)
+    const size = this.decodeSize(hSize)
     return data.slice(framePosition + size + 10)
 }
 
@@ -929,7 +930,7 @@ protected removeTags(filepath: string, fn?: (err: NodeJS.ErrnoException | null) 
             return e
         }
 
-        let newData = this.removeTagsFromBuffer(data)
+        const newData = this.removeTagsFromBuffer(data)
         if(!newData) {
             return false
         }
@@ -947,15 +948,15 @@ protected removeTags(filepath: string, fn?: (err: NodeJS.ErrnoException | null) 
                 fn(err)
             }
 
-            let newData = this.removeTagsFromBuffer(data)
+            const newData = this.removeTagsFromBuffer(data)
             if(!newData) {
                 fn(err)
                 return
             }
 
-            fs.writeFile(filepath, newData, 'binary', function(err) {
-                if(err) {
-                    fn(err)
+            fs.writeFile(filepath, newData, 'binary', (writeErr) => {
+                if(writeErr) {
+                    fn(writeErr)
                 } else {
                     fn(null)
                 }
@@ -969,11 +970,13 @@ protected removeTags(filepath: string, fn?: (err: NodeJS.ErrnoException | null) 
 **  totalSize => int
 */
 protected encodeSize(totalSize: number) {
-    let byte_3 = totalSize & 0x7F
-    let byte_2 = (totalSize >> 7) & 0x7F
-    let byte_1 = (totalSize >> 14) & 0x7F
-    let byte_0 = (totalSize >> 21) & 0x7F
-    return ([byte_0, byte_1, byte_2, byte_3])
+    // tslint:disable: no-bitwise
+    const byte3 = totalSize & 0x7F
+    const byte2 = (totalSize >> 7) & 0x7F
+    const byte1 = (totalSize >> 14) & 0x7F
+    const byte0 = (totalSize >> 21) & 0x7F
+    // tslint:enable: no-bitwise
+    return ([byte0, byte1, byte2, byte3])
 }
 
 
@@ -982,6 +985,7 @@ protected encodeSize(totalSize: number) {
 **  hSize => int
 */
 protected decodeSize(hSize: Buffer): number {
+    // tslint:disable-next-line: no-bitwise
     return ((hSize[0] << 21) + (hSize[1] << 14) + (hSize[2] << 7) + (hSize[3]))
 }
 
@@ -989,13 +993,13 @@ protected decodeSize(hSize: Buffer): number {
 **  Create header for ID3-Frame v2.3.0
 */
 protected createTagHeader() {
-    let header = Buffer.alloc(10)
+    const header = Buffer.alloc(10)
     header.fill(0)
-    header.write("ID3", 0)              //File identifier
-    header.writeUInt16BE(0x0300, 3)     //Version 2.3.0  --  03 00
-    header.writeUInt16BE(0x0000, 5)     //Flags 00
+    header.write("ID3", 0)              // File identifier
+    header.writeUInt16BE(0x0300, 3)     // Version 2.3.0  --  03 00
+    header.writeUInt16BE(0x0000, 5)     // Flags 00
 
-    //Last 4 bytes are used for header size, but have to be inserted later, because at this point, its size is not clear.
+    // Last 4 bytes are used for header size, but have to be inserted later, because at this point, its size is not clear.
 
     return header
 }
@@ -1010,13 +1014,13 @@ protected createTextFrame(specName: string, text: string) {
         return null
     }
 
-    let encoded = iconv.encode(text, "utf16")
+    const encoded = iconv.encode(text, "utf16")
 
-    let buffer = Buffer.alloc(10)
+    const buffer = Buffer.alloc(10)
     buffer.fill(0)
     buffer.write(specName, 0)                           //  ID of the specified frame
     buffer.writeUInt32BE((encoded).length + 1, 4)       //  Size of frame (string length + encoding byte)
-    let encBuffer = Buffer.alloc(1)                       //  Encoding (now using UTF-16 encoded w/ BOM)
+    const encBuffer = Buffer.alloc(1)                       //  Encoding (now using UTF-16 encoded w/ BOM)
     encBuffer.fill(1)                                   //  UTF-16
 
     // var contentBuffer = Buffer.from(encoded, 'binary')   //  Text -> Binary encoding for UTF-16 w/ BOM
@@ -1038,20 +1042,20 @@ protected createPictureFrame(data: string | ImageFrame | Buffer) {
             }
             apicData = Buffer.from(data);
         }
-        let bHeader = Buffer.alloc(10)
+        const bHeader = Buffer.alloc(10)
         bHeader.fill(0)
         bHeader.write("APIC", 0)
 
-    	let mime_type = "image/png"
+    	let mimeType = "image/png"
 
-        if(apicData[0] == 0xff && apicData[1] == 0xd8 && apicData[2] == 0xff) {
-            mime_type = "image/jpeg"
+        if(apicData[0] === 0xff && apicData[1] === 0xd8 && apicData[2] === 0xff) {
+            mimeType = "image/jpeg"
         }
 
-        let bContent = Buffer.alloc(mime_type.length + 4)
+        const bContent = Buffer.alloc(mimeType.length + 4)
         bContent.fill(0)
-        bContent[mime_type.length + 2] = 0x03                           //  Front cover
-        bContent.write(mime_type, 1)
+        bContent[mimeType.length + 2] = 0x03                           //  Front cover
+        bContent.write(mimeType, 1)
 
     	bHeader.writeUInt32BE(apicData.length + bContent.length, 4)     //  Size of frame
 
@@ -1065,24 +1069,24 @@ protected createPictureFrame(data: string | ImageFrame | Buffer) {
 **  data => buffer
 */
 protected readPictureFrame(APICFrame: Buffer, ID3Version: number) {
-    let picture = <AttachedPicture>{}
+    const picture = {} as AttachedPicture
 
     let APICMimeType
-    if(ID3Version == 2) {
+    if(ID3Version === 2) {
         APICMimeType = APICFrame.toString('ascii').substring(1, 4)
     } else {
         APICMimeType = APICFrame.toString('ascii').substring(1, APICFrame.indexOf(0x00, 1))
     }
 
-    if(APICMimeType == "image/jpeg") {
+    if(APICMimeType === "image/jpeg") {
         picture.mime = "jpeg"
-    } else if(APICMimeType == "image/png") {
+    } else if(APICMimeType === "image/png") {
         picture.mime = "png"
     } else {
         picture.mime = APICMimeType
     }
 
-    if(ID3Version == 2 && APICTypes.length < APICFrame[4]) {
+    if(ID3Version === 2 && APICTypes.length < APICFrame[4]) {
         picture.type = {
             id: APICFrame[4],
             name: APICTypes[APICFrame[4]]
@@ -1095,31 +1099,31 @@ protected readPictureFrame(APICFrame: Buffer, ID3Version: number) {
     }
 
     let descEnd
-    if(APICFrame[0] == 0x00) {
-        if(ID3Version == 2) {
+    if(APICFrame[0] === 0x00) {
+        if(ID3Version === 2) {
             picture.description = iconv.decode(APICFrame.slice(5, APICFrame.indexOf(0x00, 5)), "ISO-8859-1") || undefined
             descEnd = APICFrame.indexOf(0x00, 5)
         } else {
             picture.description = iconv.decode(APICFrame.slice(APICFrame.indexOf(0x00, 1) + 2, APICFrame.indexOf(0x00, APICFrame.indexOf(0x00, 1) + 2)), "ISO-8859-1") || undefined
             descEnd = APICFrame.indexOf(0x00, APICFrame.indexOf(0x00, 1) + 2)
         }
-    } else if (APICFrame[0] == 0x01) {
-        if(ID3Version == 2) {
-            let descOffset = 5
-            let desc = APICFrame.slice(descOffset)
-            let descFound = desc.indexOf("0000", 0, 'hex')
+    } else if (APICFrame[0] === 0x01) {
+        if(ID3Version === 2) {
+            const descOffset = 5
+            const desc = APICFrame.slice(descOffset)
+            const descFound = desc.indexOf("0000", 0, 'hex')
             descEnd = descOffset + descFound + 2
 
-            if(descFound != -1) {
+            if(descFound !== -1) {
                 picture.description = iconv.decode(desc.slice(0, descFound + 2), 'utf16') || undefined
             }
         } else {
-            let descOffset = APICFrame.indexOf(0x00, 1) + 2
-            let desc = APICFrame.slice(descOffset)
-            let descFound = desc.indexOf("0000", 0, 'hex')
+            const descOffset = APICFrame.indexOf(0x00, 1) + 2
+            const desc = APICFrame.slice(descOffset)
+            const descFound = desc.indexOf("0000", 0, 'hex')
             descEnd = descOffset + descFound + 2
 
-            if(descFound != -1) {
+            if(descFound !== -1) {
                 picture.description = iconv.decode(desc.slice(0, descFound + 2), 'utf16') || undefined
             }
         }
@@ -1158,7 +1162,7 @@ protected getTerminationCount(encoding?: string| number) {
 }
 
 protected createTextEncoding(encoding?: string | number) {
-    let buffer = Buffer.alloc(1)
+    const buffer = Buffer.alloc(1)
     buffer[0] = this.getEncodingByte(encoding)
     return buffer
 }
@@ -1207,14 +1211,14 @@ protected createCommentFrame(comment: Comment) {
     }
 
     // Create frame header
-    let buffer = Buffer.alloc(10)
+    const buffer = Buffer.alloc(10)
     buffer.fill(0)
     buffer.write("COMM", 0)                 //  Write header ID
 
-    let encodingBuffer = this.createTextEncoding(0x01)
-    let languageBuffer = this.createLanguage(comment.language)
-    let descriptorBuffer = this.createContentDescriptor(comment.shortText, 0x01, true)
-    let textBuffer = this.createText(comment.text, 0x01, false)
+    const encodingBuffer = this.createTextEncoding(0x01)
+    const languageBuffer = this.createLanguage(comment.language)
+    const descriptorBuffer = this.createContentDescriptor(comment.shortText, 0x01, true)
+    const textBuffer = this.createText(comment.text, 0x01, false)
 
     buffer.writeUInt32BE(encodingBuffer.length + languageBuffer.length + descriptorBuffer.length + textBuffer.length, 4)
     return Buffer.concat([buffer, encodingBuffer, languageBuffer, descriptorBuffer, textBuffer])
@@ -1229,13 +1233,13 @@ protected readCommentFrame(frame: Buffer) {
     if(!frame) {
         return tags
     }
-    if(frame[0] == 0x00) {
+    if(frame[0] === 0x00) {
         tags = {
             language: iconv.decode(frame, "ISO-8859-1").substring(1, 4).replace(/\0/g, ""),
             shortText: iconv.decode(frame, "ISO-8859-1").substring(4, frame.indexOf(0x00, 1)).replace(/\0/g, ""),
             text: iconv.decode(frame, "ISO-8859-1").substring(frame.indexOf(0x00, 1) + 1).replace(/\0/g, "")
         }
-    } else if(frame[0] == 0x01) {
+    } else if(frame[0] === 0x01) {
         let descriptorEscape = 0
         while(frame[descriptorEscape] !== undefined && frame[descriptorEscape] !== 0x00 || frame[descriptorEscape + 1] !== 0x00 || frame[descriptorEscape + 2] === 0x00) {
             descriptorEscape++
@@ -1243,8 +1247,8 @@ protected readCommentFrame(frame: Buffer) {
         if(frame[descriptorEscape] === undefined) {
             return tags
         }
-        let shortText = frame.slice(4, descriptorEscape)
-        let text = frame.slice(descriptorEscape + 2)
+        const shortText = frame.slice(4, descriptorEscape)
+        const text = frame.slice(descriptorEscape + 2)
 
         tags = {
             language: frame.toString().substring(1, 4).replace(/\0/g, ""),
@@ -1265,23 +1269,23 @@ protected readCommentFrame(frame: Buffer) {
 **/
 protected createUnsynchronisedLyricsFrame(unsynchronisedLyrics: UnsynchronisedLyrics | string) {
     if(typeof unsynchronisedLyrics === 'string' || unsynchronisedLyrics instanceof String) {
-        unsynchronisedLyrics = <UnsynchronisedLyrics>{
+        unsynchronisedLyrics = ({
             text: unsynchronisedLyrics
-        }
+        } as UnsynchronisedLyrics)
     }
     if(!unsynchronisedLyrics || !unsynchronisedLyrics.text) {
         return null
     }
 
     // Create frame header
-    let buffer = Buffer.alloc(10)
+    const buffer = Buffer.alloc(10)
     buffer.fill(0)
     buffer.write("USLT", 0)                 //  Write header ID
 
-    let encodingBuffer = this.createTextEncoding(0x01)
-    let languageBuffer = this.createLanguage(unsynchronisedLyrics.language)
-    let descriptorBuffer = this.createContentDescriptor(unsynchronisedLyrics.shortText, 0x01, true)
-    let textBuffer = this.createText(unsynchronisedLyrics.text, 0x01, false)
+    const encodingBuffer = this.createTextEncoding(0x01)
+    const languageBuffer = this.createLanguage(unsynchronisedLyrics.language)
+    const descriptorBuffer = this.createContentDescriptor(unsynchronisedLyrics.shortText, 0x01, true)
+    const textBuffer = this.createText(unsynchronisedLyrics.text, 0x01, false)
 
     buffer.writeUInt32BE(encodingBuffer.length + languageBuffer.length + descriptorBuffer.length + textBuffer.length, 4)
     return Buffer.concat([buffer, encodingBuffer, languageBuffer, descriptorBuffer, textBuffer])
@@ -1296,13 +1300,13 @@ protected readUnsynchronisedLyricsFrame(frame: Buffer) {
     if(!frame) {
         return tags
     }
-    if(frame[0] == 0x00) {
+    if(frame[0] === 0x00) {
         tags = {
             language: iconv.decode(frame, "ISO-8859-1").substring(1, 4).replace(/\0/g, ""),
             shortText: iconv.decode(frame, "ISO-8859-1").substring(4, frame.indexOf(0x00, 1)).replace(/\0/g, ""),
             text: iconv.decode(frame, "ISO-8859-1").substring(frame.indexOf(0x00, 1) + 1).replace(/\0/g, "")
         }
-    } else if(frame[0] == 0x01) {
+    } else if(frame[0] === 0x01) {
         let descriptorEscape = 0
         while(frame[descriptorEscape] !== undefined && frame[descriptorEscape] !== 0x00 || frame[descriptorEscape + 1] !== 0x00 || frame[descriptorEscape + 2] === 0x00) {
             descriptorEscape++
@@ -1310,8 +1314,8 @@ protected readUnsynchronisedLyricsFrame(frame: Buffer) {
         if(frame[descriptorEscape] === undefined) {
             return tags
         }
-        let shortText = frame.slice(4, descriptorEscape)
-        let text = frame.slice(descriptorEscape + 2)
+        const shortText = frame.slice(4, descriptorEscape)
+        const text = frame.slice(descriptorEscape + 2)
 
         tags = {
             language: frame.toString().substring(1, 4).replace(/\0/g, ""),
@@ -1330,7 +1334,7 @@ protected readUnsynchronisedLyricsFrame(frame: Buffer) {
 **  }
 **/
 protected createUserDefinedText(userDefinedText: UserDefinedText | UserDefinedText[], recursiveBuffer?: Buffer): Buffer {
-    let udt: UserDefinedText = <UserDefinedText>{};
+    let udt: UserDefinedText = {} as UserDefinedText;
     if(userDefinedText instanceof Array && userDefinedText.length > 0) {
         if(!recursiveBuffer) {
             // Don't alter passed array value!
@@ -1342,13 +1346,13 @@ protected createUserDefinedText(userDefinedText: UserDefinedText | UserDefinedTe
 
     if(udt && udt.description) {
         // Create frame header
-        let buffer = Buffer.alloc(10)
+        const buffer = Buffer.alloc(10)
         buffer.fill(0)
         buffer.write("TXXX", 0)                 //  Write header ID
 
-        let encodingBuffer = this.createTextEncoding(0x01)
-        let descriptorBuffer = this.createContentDescriptor(udt.description, 0x01, true)
-        let valueBuffer = this.createText(udt.value, 0x01, false)
+        const encodingBuffer = this.createTextEncoding(0x01)
+        const descriptorBuffer = this.createContentDescriptor(udt.description, 0x01, true)
+        const valueBuffer = this.createText(udt.value, 0x01, false)
 
         buffer.writeUInt32BE(encodingBuffer.length + descriptorBuffer.length + valueBuffer.length, 4)
         if(!recursiveBuffer) {
@@ -1373,12 +1377,12 @@ protected readUserDefinedText(frame: Buffer) {
     if(!frame) {
         return tags
     }
-    if(frame[0] == 0x00) {
+    if(frame[0] === 0x00) {
         tags = {
             description: iconv.decode(frame, "ISO-8859-1").substring(1, frame.indexOf(0x00, 1)).replace(/\0/g, ""),
             value: iconv.decode(frame, "ISO-8859-1").substring(frame.indexOf(0x00, 1) + 1).replace(/\0/g, "")
         }
-    } else if(frame[0] == 0x01) {
+    } else if(frame[0] === 0x01) {
         let descriptorEscape = 0
         while(frame[descriptorEscape] !== undefined && frame[descriptorEscape] !== 0x00 || frame[descriptorEscape + 1] !== 0x00 || frame[descriptorEscape + 2] === 0x00) {
             descriptorEscape++
@@ -1386,8 +1390,8 @@ protected readUserDefinedText(frame: Buffer) {
         if(frame[descriptorEscape] === undefined) {
             return tags
         }
-        let description = frame.slice(1, descriptorEscape)
-        let value = frame.slice(descriptorEscape + 2)
+        const description = frame.slice(1, descriptorEscape)
+        const value = frame.slice(descriptorEscape + 2)
 
         tags = {
             description: iconv.decode(description, "utf16").replace(/\0/g, ""),
@@ -1407,7 +1411,7 @@ protected readUserDefinedText(frame: Buffer) {
 **/
 protected createPopularimeterFrame(popularimeter: Popularimeter) {
     popularimeter = popularimeter || {}
-    let email = popularimeter.email
+    const email = popularimeter.email
     let rating = Math.trunc(popularimeter.rating)
     let counter = Math.trunc(popularimeter.counter)
     if(!email) {
@@ -1421,17 +1425,17 @@ protected createPopularimeterFrame(popularimeter: Popularimeter) {
     }
 
     // Create frame header
-    let buffer = Buffer.alloc(10, 0)
+    const buffer = Buffer.alloc(10, 0)
     buffer.write("POPM", 0)                 //  Write header ID
 
     let emailBuffer = this.createText(email, 0x01, false)
     emailBuffer = Buffer.from(email + '\0', 'utf8')
-    let ratingBuffer = Buffer.alloc(1, rating)
-    let counterBuffer = Buffer.alloc(4, 0)
+    const ratingBuffer = Buffer.alloc(1, rating)
+    const counterBuffer = Buffer.alloc(4, 0)
     counterBuffer.writeUInt32BE(counter, 0)
 
     buffer.writeUInt32BE(emailBuffer.length + ratingBuffer.length + counterBuffer.length, 4)
-    var frame = Buffer.concat([buffer, emailBuffer, ratingBuffer, counterBuffer])
+    const frame = Buffer.concat([buffer, emailBuffer, ratingBuffer, counterBuffer])
     return frame
 }
 
@@ -1439,20 +1443,20 @@ protected createPopularimeterFrame(popularimeter: Popularimeter) {
 **  frame   => Buffer
 */
 protected readPopularimeterFrame(frame: Buffer) {
-    let tags: any = {}
+    const tags: any = {}
 
     if(!frame) {
         return tags
     }
-    let endEmailIndex = frame.indexOf(0x00, 1)
+    const endEmailIndex = frame.indexOf(0x00, 1)
     if(endEmailIndex > -1) {
         tags.email = iconv.decode(frame.slice(0, endEmailIndex), "ISO-8859-1")
-        let ratingIndex = endEmailIndex + 1
+        const ratingIndex = endEmailIndex + 1
         if(ratingIndex < frame.length) {
             tags.rating = frame[ratingIndex]
-            let counterIndex = ratingIndex + 1
+            const counterIndex = ratingIndex + 1
             if(counterIndex < frame.length) {
-                let value = frame.slice(counterIndex, frame.length)
+                const value = frame.slice(counterIndex, frame.length)
                 if(value.length >= 4) {
                     tags.counter = value.readUInt32BE()
                 }
@@ -1470,9 +1474,9 @@ protected readPopularimeterFrame(frame: Buffer) {
 **/
 protected createPrivateFrame(_private: PrivateFrame) {
     if(_private instanceof Array && _private.length > 0) {
-        let frames: Buffer[] = []
+        const frames: Buffer[] = []
         _private.forEach(tag => {
-            let frame = this.createPrivateFrameHelper(tag)
+            const frame = this.createPrivateFrameHelper(tag)
             if(frame) {
                 frames.push(frame)
             }
@@ -1487,11 +1491,11 @@ protected createPrivateFrameHelper(_private: PrivateFrame) {
     if(!_private || !_private.ownerIdentifier || !_private.data) {
         return null;
     }
-    let header = Buffer.alloc(10, 0)
+    const header = Buffer.alloc(10, 0)
     header.write("PRIV")
-    let ownerIdentifier = Buffer.from(_private.ownerIdentifier + "\0", "utf8")
+    const ownerIdentifier = Buffer.from(_private.ownerIdentifier + "\0", "utf8")
     let data
-    if(typeof(_private.data) == "string") {
+    if(typeof(_private.data) === "string") {
         data = Buffer.from(_private.data, "utf8")
     } else {
         data = _private.data
@@ -1505,14 +1509,14 @@ protected createPrivateFrameHelper(_private: PrivateFrame) {
 **  frame   => Buffer
 */
 protected readPrivateFrame(frame: Buffer) {
-    let tags: any = {}
+    const tags: any = {}
 
     if(!frame) {
         return tags
     }
 
-    let endOfOwnerIdentification = frame.indexOf(0x00)
-    if(endOfOwnerIdentification == -1) {
+    const endOfOwnerIdentification = frame.indexOf(0x00)
+    if(endOfOwnerIdentification === -1) {
         return tags
     }
 
@@ -1539,9 +1543,9 @@ protected readPrivateFrame(frame: Buffer) {
 **/
 protected createChapterFrame(chapter: Chapter) {
     if(chapter instanceof Array && chapter.length > 0) {
-        let frames: Buffer[] = []
+        const frames: Buffer[] = []
         chapter.forEach((tag, index) => {
-            let frame = this.createChapterFrameHelper(tag, index + 1)
+            const frame = this.createChapterFrameHelper(tag, index + 1)
             if(frame) {
                 frames.push(frame)
             }
@@ -1557,19 +1561,19 @@ protected createChapterFrameHelper(chapter: any, id: any) {
         return null
     }
 
-    let header = Buffer.alloc(10, 0)
+    const header = Buffer.alloc(10, 0)
     header.write("CHAP")
 
-    let elementIDBuffer = Buffer.from(chapter.elementID + "\0")
-    let startTimeBuffer = Buffer.alloc(4)
+    const elementIDBuffer = Buffer.from(chapter.elementID + "\0")
+    const startTimeBuffer = Buffer.alloc(4)
     startTimeBuffer.writeUInt32BE(chapter.startTimeMs)
-    let endTimeBuffer = Buffer.alloc(4)
+    const endTimeBuffer = Buffer.alloc(4)
     endTimeBuffer.writeUInt32BE(chapter.endTimeMs)
-    let startOffsetBytesBuffer = Buffer.alloc(4, 0xFF)
+    const startOffsetBytesBuffer = Buffer.alloc(4, 0xFF)
     if(chapter.startOffsetBytes) {
         startOffsetBytesBuffer.writeUInt32BE(chapter.startOffsetBytes)
     }
-    let endOffsetBytesBuffer = Buffer.alloc(4, 0xFF)
+    const endOffsetBytesBuffer = Buffer.alloc(4, 0xFF)
     if(chapter.endOffsetBytes) {
         endOffsetBytesBuffer.writeUInt32BE(chapter.endOffsetBytes)
     }
@@ -1578,7 +1582,7 @@ protected createChapterFrameHelper(chapter: any, id: any) {
     if(chapter.tags) {
         frames = this.createBuffersFromTags(chapter.tags)
     }
-    let framesBuffer = frames ? Buffer.concat(frames) : Buffer.alloc(0)
+    const framesBuffer = frames ? Buffer.concat(frames) : Buffer.alloc(0)
 
     header.writeUInt32BE(elementIDBuffer.length + 16 + framesBuffer.length, 4)
     return Buffer.concat([header, elementIDBuffer, startTimeBuffer, endTimeBuffer, startOffsetBytesBuffer, endOffsetBytesBuffer, framesBuffer])
@@ -1588,29 +1592,29 @@ protected createChapterFrameHelper(chapter: any, id: any) {
 **  frame   => Buffer
 */
 protected readChapterFrame(frame: Buffer) {
-    let tags: any = {}
+    const tags: any = {}
 
     if(!frame) {
         return tags
     }
 
-    let endOfElementIDString = frame.indexOf(0x00)
-    if(endOfElementIDString == -1 || frame.length - endOfElementIDString - 1 < 16) {
+    const endOfElementIDString = frame.indexOf(0x00)
+    if(endOfElementIDString === -1 || frame.length - endOfElementIDString - 1 < 16) {
         return tags
     }
 
     tags.elementID = iconv.decode(frame.slice(0, endOfElementIDString), "ISO-8859-1")
     tags.startTimeMs = frame.readUInt32BE(endOfElementIDString + 1)
     tags.endTimeMs = frame.readUInt32BE(endOfElementIDString + 5)
-    if(frame.readUInt32BE(endOfElementIDString + 9) != Buffer.alloc(4, 0xff).readUInt32BE()) {
+    if(frame.readUInt32BE(endOfElementIDString + 9) !== Buffer.alloc(4, 0xff).readUInt32BE()) {
         tags.startOffsetBytes = frame.readUInt32BE(endOfElementIDString + 9)
     }
-    if(frame.readUInt32BE(endOfElementIDString + 13) != Buffer.alloc(4, 0xff).readUInt32BE()) {
+    if(frame.readUInt32BE(endOfElementIDString + 13) !== Buffer.alloc(4, 0xff).readUInt32BE()) {
         tags.endOffsetBytes = frame.readUInt32BE(endOfElementIDString + 13)
     }
 
     if(frame.length - endOfElementIDString - 17 > 0) {
-        let framesBuffer = frame.slice(endOfElementIDString + 17)
+        const framesBuffer = frame.slice(endOfElementIDString + 17)
         tags.tags = this.getTagsFromFrames(this.getFramesFromID3Body(framesBuffer, 3, 4, 10), 3)
     }
 
