@@ -86,24 +86,24 @@ test.todo('writing tags')
   console.log(frame)
 })*/
 
-//let file = fs.readFileSync("./example/Kevin Penkin - Tomorrow.mp3")
+// let file = fs.readFileSync("./example/Kevin Penkin - Tomorrow.mp3")
 /*nodeID3.update(tags, file, function(err, buffer) {
   console.log(err)
   console.log(buffer)
 })*/
 
-//fs.writeFileSync("./example/Kevin Penkin - Tomorrow.mp3", nodeID3.update(tags, file))
+// fs.writeFileSync("./example/Kevin Penkin - Tomorrow.mp3", nodeID3.update(tags, file))
 
-//console.log(nodeID3.read("./example/example.mp3"))
+// console.log(nodeID3.read("./example/example.mp3"))
 
-//async
+// async
 
 /*nodeID3.write(tags, "./example/Kevin Penkin - Tomorrow.mp3", function(err) {
   console.log(err)
 })
 */
 
-//console.log(nodeID3.read("./example/Kevin Penkin - Tomorrow.mp3"))
+// console.log(nodeID3.read("./example/Kevin Penkin - Tomorrow.mp3"))
 
 
 /*console.log("READING\n\n")
