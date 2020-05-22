@@ -5,26 +5,25 @@ import * as path from 'path';
 const nodeID3 = new NodeID3();
 
 it('is initialised correctly', () => {
-    expect(nodeID3).toBeInstanceOf(NodeID3);
+  expect(nodeID3).toBeInstanceOf(NodeID3);
 });
 
 it('decodes text frames correctly', () => {
-    const tags = nodeID3.read(path.join(__dirname, 'sample.mp3'));
-    expect(tags.title).toBe('440Hz Sample');
-    expect(tags.artist).toBe('Samples');
-    expect(tags.performerInfo).toBe('Audio Samples Artist');
-    expect(tags.composer).toBe('The Composer');
-    expect(tags.album).toBe('Audio Samples');
-    expect(tags.trackNumber).toBe('1/2');
-    expect(tags.partOfSet).toBe('3/4');
-    expect(tags.genre).toBe('13');
-    expect(tags.encodingTechnology).toBe('Lavf57.56.101');
+  const tags = nodeID3.read(path.join(__dirname, 'sample.mp3'));
+  expect(tags.title).toBe('440Hz Sample');
+  expect(tags.artist).toBe('Samples');
+  expect(tags.performerInfo).toBe('Audio Samples Artist');
+  expect(tags.composer).toBe('The Composer');
+  expect(tags.album).toBe('Audio Samples');
+  expect(tags.trackNumber).toBe('1/2');
+  expect(tags.partOfSet).toBe('3/4');
+  expect(tags.genre).toBe('13');
+  expect(tags.encodingTechnology).toBe('Lavf57.56.101');
 });
 
-test.todo('image decoding')
-test.todo('chapter decoding')
-test.todo('writing tags')
-
+test.todo('image decoding');
+test.todo('chapter decoding');
+test.todo('writing tags');
 
 // const tags = nodeID3.read(path.join(__dirname, 'sample.mp3'));
 // console.log(tags);
@@ -103,7 +102,6 @@ test.todo('writing tags')
 */
 
 // console.log(nodeID3.read("./example/Kevin Penkin - Tomorrow.mp3"))
-
 
 /*console.log("READING\n\n")
 nodeID3.read("./example/Kevin Penkin - Tomorrow.mp3", function(err, tags) {
