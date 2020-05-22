@@ -1,12 +1,12 @@
 import fs = require('fs')
 import iconv = require("iconv-lite")
 
-interface DescribedFrame {
+export interface DescribedFrame {
     name: string;
     body: Buffer;
 }
 
-interface AttachedPicture {
+export interface AttachedPicture {
     mime: string; /** See https://en.wikipedia.org/wiki/ID3#ID3v2_embedded_image_extension */
     type: {
         id: number;
@@ -16,43 +16,56 @@ interface AttachedPicture {
     imageBuffer: Buffer;
 }
 
-interface Chapter {
+export interface Chapter {
     startTimeMs: number;
     endTimeMs:   number;
-    startOffsetBytes: number;
-    endOffsetBytes: number;
+    startOffsetBytes?: number;
+    endOffsetBytes?: number;
     tags: object;
 }
 
-interface Comment {
+export interface Comment {
     language: string; /** (3 characters) */
     text: string;
     shortText: string;
 }
 
-interface Popularimeter {
+export interface ImageFrame {
+    mime: string;
+    /**
+     * See https://en.wikipedia.org/wiki/ID3#ID3v2_embedded_image_extension
+     */
+    type: {
+       id: number;
+       name: string;
+    };
+    description: string;
+    imageBuffer: Buffer;
+ }
+
+export interface Popularimeter {
     email: string;
     rating: number; /** 1-255 */
     counter: number;
 }
 
-interface PrivateFrame {
+export interface PrivateFrame {
     ownerIdentifier: string;
     data: Buffer | string;
 }
 
-interface UnsynchronisedLyrics {
+export interface UnsynchronisedLyrics {
     language: string; /** (3 characters) */
     text: string;
     shortText: string;
 }
 
-interface UserDefinedText {
+export interface UserDefinedText {
     description: string;
     value: string;
 }
 
-interface Tags {
+export interface Tags {
     raw?: object;
     /**
      * The 'Album/Movie/Show title' frame is intended for the title of the recording(/source of sound) which the audio in the file is taken from. 
@@ -309,22 +322,9 @@ interface Tags {
        language: string,
        text: string
     }
-    userDefinedText?: [{
-       description: string,
-       value: string
-    }]
-    image?: {
-       mime: string
-       /**
-        * See https://en.wikipedia.org/wiki/ID3#ID3v2_embedded_image_extension
-        */
-       type: {
-          id: number,
-          name: string
-       },
-       description: string,
-       imageBuffer: Buffer,
-    },
+    userDefinedText?: UserDefinedText[],
+    chapter?: Chapter[],
+    image?: ImageFrame | string,
     popularimeter?: {
        email: string,
        /**
@@ -333,10 +333,7 @@ interface Tags {
        rating: number,
        counter: number,
     },
-    private?: [{
-       ownerIdentifier: string,
-       data: string
-    }]
+    private?: PrivateFrame[]
  }
 
 
@@ -518,7 +515,7 @@ const APICTypes = [
 	"publisher logotype"
 ]
 
-class NodeID3 {
+export class NodeID3 {
 
 /*
 **  Write passed tags to a file/buffer @ filebuffer
@@ -827,9 +824,9 @@ protected getTagsFromFrames(frames: DescribedFrame[], ID3Version: number) {
                 decoded = iconv.decode(frame.body.slice(1), "ISO-8859-1").replace(/\0/g, "")
             }
             tags.raw[frame.name] = decoded
-            let versionFrames = ID3Version === 2 ? SFramesV220 : SFrames;
+            let versionFrames = ID3Version === 2 ? TFramesV220 : TFrames;
             Object.keys(versionFrames).map(function(key) {
-                if(versionFrames[key].name === frame.name) {
+                if(versionFrames[key] === frame.name) {
                     tags[key] = decoded
                 }
             })
@@ -1030,7 +1027,7 @@ protected createTextFrame(specName: string, text: string) {
 /*
 **  data => string || buffer
 */
-protected createPictureFrame(data: string | { imageBuffer: Buffer; } | Buffer) {
+protected createPictureFrame(data: string | ImageFrame | Buffer) {
     try {
         let apicData: Buffer;
         if (typeof data === 'string') {
@@ -1655,4 +1652,4 @@ protected proxyCall(funcName: string, p1: any, p2?: any) {
 
 }
 
-export = new NodeID3();
+export default new NodeID3();
