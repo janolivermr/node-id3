@@ -518,7 +518,7 @@ const APICTypes = [
 	"publisher logotype"
 ]
 
-export class NodeID3 {
+class NodeID3 {
 
 /*
 **  Write passed tags to a file/buffer @ filebuffer
@@ -1654,3 +1654,5 @@ protected proxyCall(funcName: string, p1: any, p2?: any) {
 }
 
 }
+
+export = new NodeID3();
